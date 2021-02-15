@@ -15,7 +15,7 @@ SoundMeter에서는 마이크에서 수집되는 소음을 감지 하여 화면�
 ## Demo
 
 
-![Screenshot](https://github.com/eastar-dev/SoundMeter/blob/readme/demo.gif?raw=true)
+![Screenshot](https://raw.githubusercontent.com/eastar-dev/SoundMeter/master/release/demo.webp)
 
 
 
