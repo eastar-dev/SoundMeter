@@ -41,6 +41,7 @@ class SoundMeter {
 
     //return about 0~100
     @FloatRange(from = 0.0, to = 1.0)
+    /** 2000.0이하는 무시하고 평준화 해서 반환 */
     fun getMaxAmplitudeLevel(): Float {
         mRecorder ?: return 0F
 
@@ -54,8 +55,8 @@ class SoundMeter {
 
     /**https://stackoverflow.com/questions/10655703/what-does-androids-getmaxamplitude-function-for-the-mediarecorder-actually-gi*/
     val REFERENCE = 0.1
-
     @Suppress("FunctionName")
+    /** dB로 변환 해서 리턴 */
     fun getMax_dB(): Double {
         mRecorder ?: return 0.0
 
