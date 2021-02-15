@@ -22,83 +22,72 @@ import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.log.Log
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.animation.AccelerateInterpolator
+import androidx.annotation.FloatRange
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.content.ContextCompat
 import kotlin.math.max
 import kotlin.math.roundToLong
 
-class SoundLevelView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
-    AppCompatImageView(context, attrs), AnimatorUpdateListener {
+class SoundLevelView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : AppCompatImageView(context, attrs), AnimatorUpdateListener {
 
-
-    private val mBackgroundPaint: Paint by lazy {
-        Paint().apply {
-            color = Color.TRANSPARENT
-        }
+    private var maxRadiusPaint: Paint = Paint().apply {
+        color = 0xff666666.toInt()
     }
-    private val mVolPaint: Paint by lazy {
-        Paint().apply {
-            color = context.getColor(R.color.design_default_color_secondary)
-            alpha = 0xcc
-        }
+    private val amplitudePaint: Paint = Paint().apply {
+        color = ContextCompat.getColor(context, R.color.design_default_color_secondary) and 0x88ffffff.toInt()
     }
-
-    private val mLinePaint: Paint by lazy {
-        Paint().apply {
-            color = Color.RED
-            style = Paint.Style.STROKE
-            strokeWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1F, Resources.getSystem().displayMetrics)
-        }
+    private val thresholdPaint: Paint = Paint().apply {
+        color = Color.RED
+        style = Paint.Style.STROKE
+        strokeWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1F, Resources.getSystem().displayMetrics)
+    }
+    private val amplitudeAnimation: ValueAnimator = ValueAnimator.ofFloat().apply {
+        interpolator = AccelerateInterpolator()
+        addUpdateListener(this@SoundLevelView)
     }
 
-    private var mThreshold: Float = 200F
-    private val decrease: ValueAnimator by lazy {
-        ValueAnimator.ofFloat().apply {
-            interpolator = AccelerateInterpolator()
-            addUpdateListener(this@SoundLevelView)
-        }
-    }
 
-    private var cx = 0
-    private var cy = 0
-    private var mVol = 0f
-    private var unit = 0f
+    @FloatRange(from = 0.0, to = 1.0)
+    var threshold: Float = 0.5F
 
-    //may be 0~100
-    fun setThreshold(threshold: Float) {
-        mThreshold = threshold * 100 * unit
-    }
+    @FloatRange(from = 0.0, to = 1.0)
+    private var amplitude = 0F
+    private var maxRadius = with(Resources.getSystem().displayMetrics) { max(heightPixels, widthPixels) / 2F }
+    private var cy = Resources.getSystem().displayMetrics.heightPixels / 2.5F
+    private var cx = Resources.getSystem().displayMetrics.widthPixels / 2F
 
-    //may be 0~100
-    fun setLevel(amplitude: Float) {
-        val currentVol = amplitude * unit
-        if (currentVol <= mVol) return
-        with(decrease) {
-            setFloatValues(currentVol, 0f)
-            duration = (amplitude * 20L).roundToLong()
+    fun setLevel(@FloatRange(from = 0.0, to = 1.0) amplitude: Float) {
+        if (amplitude <= this.amplitude)
+            return
+        Log.e(amplitude)
+        with(amplitudeAnimation) {
+            setFloatValues(amplitude, 0f)
+            duration = (amplitude * 1000L).roundToLong()
             start()
         }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        cx = w / 2
-        cy = (h / 2.5f).toInt()
-        unit = max(w, h) / 2f / 100f
+        cx = w / 2F
+        cy = h / 2.5F
+        maxRadius = max(w, h) / 2f
         invalidate()
     }
 
     override fun draw(canvas: Canvas) {
-        canvas.drawPaint(mBackgroundPaint)
-        canvas.drawCircle(cx.toFloat(), cy.toFloat(), mVol, mVolPaint)
-        canvas.drawCircle(cx.toFloat(), cy.toFloat(), mThreshold, mLinePaint)
+        canvas.drawCircle(cx, cy, maxRadius, maxRadiusPaint)
+        canvas.drawCircle(cx, cy, maxRadius * amplitude, amplitudePaint)
+        canvas.drawCircle(cx, cy, maxRadius * threshold, thresholdPaint)
         super.draw(canvas)
     }
 
     override fun onAnimationUpdate(animation: ValueAnimator) {
-        mVol = animation.animatedValue as Float
+        amplitude = animation.animatedValue as Float
         invalidate()
     }
 

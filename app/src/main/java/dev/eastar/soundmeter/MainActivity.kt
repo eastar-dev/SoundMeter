@@ -4,14 +4,12 @@ import android.content.Intent
 import android.log.Log
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.*
 import dev.eastar.soundmeter.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.yield
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bb: ActivityMainBinding
@@ -48,10 +46,11 @@ class MainActivity : AppCompatActivity() {
                     mSoundMeter.start()
                     val job = async(Dispatchers.Main) {
                         while (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-                            bb.soundLevel.setLevel(mSoundMeter.getAmplitude())
-                            Log.w("running..")
-                            yield()
-                            //delay(1000)
+                            val level = mSoundMeter.getMaxAmplitudeLevel()
+                            bb.soundLevel.setLevel(level)
+                            //Log.w("running..", level)
+                            //yield()
+                            delay(500)
                         }
                     }
                     job.join()
@@ -63,8 +62,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         //super.onBackPressed()
-        //AlertDialog.Builder(this).setTitle("hello").show()
-        startActivity(Intent(this , PauseActivity::class.java))
+        startActivity(Intent(this, PauseActivity::class.java))
     }
 
     override fun onStart() {
