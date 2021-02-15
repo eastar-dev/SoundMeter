@@ -34,6 +34,7 @@ class SoundMeter {
 
     fun stop() = mRecorder?.run {
         stop()
+        reset()
         release()
     }
 
@@ -46,6 +47,7 @@ class SoundMeter {
     }
 
     fun getAmplitudeEMA(): Double {
+        val EMA_FILTER = 0.6
         var amp = 0.0
         if (mRecorder != null)
             amp = mRecorder!!.maxAmplitude / 2700.0
@@ -53,7 +55,4 @@ class SoundMeter {
         return mEMA
     }
 
-    companion object {
-        private const val EMA_FILTER = 0.6
-    }
 }

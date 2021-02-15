@@ -68,7 +68,7 @@ class SoundLevelView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     //may be 0~100
     fun setThreshold(threshold: Float) {
-        mThreshold = threshold * unit
+        mThreshold = threshold * 100 * unit
     }
 
     //may be 0~100
