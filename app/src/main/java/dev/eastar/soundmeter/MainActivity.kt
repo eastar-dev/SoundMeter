@@ -10,6 +10,7 @@ import dev.eastar.soundmeter.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.yield
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bb: ActivityMainBinding
@@ -48,9 +49,9 @@ class MainActivity : AppCompatActivity() {
                         while (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
                             val level = mSoundMeter.getMaxAmplitudeLevel()
                             bb.soundLevel.setLevel(level)
-                            //Log.w("running..", level)
-                            //yield()
-                            delay(500)
+                            Log.w("running..", level)
+                            yield()
+                            //delay(500)
                         }
                     }
                     job.join()
